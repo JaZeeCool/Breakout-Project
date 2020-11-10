@@ -1,0 +1,86 @@
+PowerUp = Class{}
+
+function PowerUp:init(skin)
+    -- positional variables
+    self.width = 16
+    self.height = 16
+
+    -- keep track of our x and y velocities
+    self.dy = 50
+    self.dx = 0
+
+    -- where the powerup will spawn
+    self.x = math.random(0, VIRTUAL_WIDTH - 10)
+    self.y = 0
+
+    -- this will be the skin of our powerup which is indexed from 
+    -- our table of quads
+    self.skin = skin
+
+end
+
+function PowerUp:collides(target)
+    -- first, check to see if the left edge of either is farther to the right
+    -- than the right edge of the other
+    if self.x > target.x + target.width or target.x > self.x + self.width then
+        return false
+    end
+
+    -- then check to see if the bottom edge of either is higher than the top
+    -- edge of the other
+    if self.y > target.y + target.height or target.y > self.y + self.height then
+        return false
+    end 
+
+    -- if the above aren't true, they're overlapping
+    return true
+end
+
+--[[
+    Places the powerup next to the ball, will change later this is only
+    for testing purposes
+]]
+
+function PowerUp:update(dt)
+    self.x = self.x + self.dx * dt
+    self.y = self.y + self.dy * dt
+
+    -- allow powerup to bounce off walls
+    if self.x <= 0 then
+        self.x = 0
+        self.dx = -self.dx
+        gSounds['wall-hit']:play()
+    end
+
+    if self.x >= VIRTUAL_WIDTH - 8 then
+        self.x = VIRTUAL_WIDTH - 8
+        self.dx = -self.dx
+        gSounds['wall-hit']:play()
+    end
+
+    if self.y <= 0 then
+        self.y = 0
+        self.dy = -self.dy
+        gSounds['wall-hit']:play()
+    end
+end
+
+--[[
+    Return what type of powerup we have
+]]
+function PowerUp:powerType()
+    if self.skin == 9 then
+        return "two_balls"
+    elseif self.skin == 10 then
+        return "key"
+    end
+end
+
+--[[
+    Render the powerup on screen
+]]
+function PowerUp:render()
+    love.graphics.draw(gTextures['main'], gFrames['powerups'][self.skin], 
+        self.x, self.y)
+end
+
